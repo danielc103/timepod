@@ -1,0 +1,22 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: auto-scale
+spec:
+  schedule: "* * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccount: autoscaler
+          containers:
+          - name: py-scale
+            image: danielc103/py-scale:latest
+            args:
+              - python
+              - autoscale.py
+              - -n
+              - {{ .Values.namespace }}
+          restartPolicy: OnFailure
